@@ -9,7 +9,8 @@ const useGetRepos = (repoName) => {
   const setError = useReposState((state) => state.setError);
 
   if (!isLoading && !isEmpty(data)) {
-    setRepos(data.items);
+    const repoResponse = data.data;
+    setRepos(repoResponse);
   }
 
   if (isError && error) {

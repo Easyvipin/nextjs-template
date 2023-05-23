@@ -42,17 +42,9 @@ export function Repos({
 
   const repos = useReposState((state) => state.repos);
 
-  useEffect(() => {
-    if (repos && !repos?.items?.length) {
-      dispatchGetGithubRepos(searchKey);
-    }
-  }, []);
-
   const handleOnChange = debounce((rName) => {
     if (!isEmpty(rName)) {
       setRepoName(rName);
-    } else {
-      dispatchClearGithubRepos();
     }
   }, 200);
 

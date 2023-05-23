@@ -2,10 +2,13 @@ import { setError } from '@app/utils/reducer';
 import { create } from 'zustand';
 
 const useReposState = create((set) => ({
-  repos: [],
+  repos: {},
   loading: false,
   error: null,
-  setRepos: (reposList) => set(() => ({ repos: reposList })),
+  setRepos: (reposList) =>
+    set(() => {
+      return { repos: reposList };
+    }),
   setError: (errorMessage) => set(() => ({ error: errorMessage }))
 }));
 
