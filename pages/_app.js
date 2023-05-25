@@ -5,7 +5,6 @@ import colors from '@themes/colors';
 import globalStyle from '@app/global-styles';
 import { Global } from '@emotion/react';
 import { translationMessages, DEFAULT_LOCALE } from '@app/i18n';
-import { wrapper } from '@app/configureStore';
 import 'antd/dist/antd.css';
 
 const theme = {
@@ -35,4 +34,4 @@ class MyApp extends App {
   }
 }
 
-export default wrapper.withRedux(MyApp);
+export default MyApp;

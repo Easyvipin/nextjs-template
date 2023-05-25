@@ -14,39 +14,24 @@ import { Divider, Input, Row } from 'antd';
 import debounce from 'lodash/debounce';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { injectIntl } from 'react-intl';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
-import injectSaga from '@utils/injectSaga';
-import { createStructuredSelector } from 'reselect';
-
-import { reposActionCreators } from './reducer';
-import saga from './saga';
-import { selectReposData, selectReposError, selectReposSearchKey } from './selectors';
 import useGetRepos from './hooks/useGetRepos';
-import useReposState from './useReposState';
+import useBoundStore from '@app/store/useBoundStore';
 
-export function Repos({
-  intl,
-  error,
-  loading,
-  searchKey,
-  recommendations,
-  dispatchGetGithubRepos,
-  dispatchClearGithubRepos
-}) {
-  const [repoName, setRepoName] = useState('');
+export function Repos({ intl, error, recommendations }) {
+  const repoSearchKey = useBoundStore((state) => state.searchKey);
+  const setRepoSearchKey = useBoundStore((state) => state.setSearchKey);
 
-  const { isLoading: repoLoading } = useGetRepos(repoName);
+  const { isLoading: repoLoading } = useGetRepos(repoSearchKey);
 
-  const repos = useReposState((state) => state.repos);
+  const repos = useBoundStore((state) => state.repos);
 
   const handleOnChange = debounce((rName) => {
     if (!isEmpty(rName)) {
-      setRepoName(rName);
+      setRepoSearchKey(rName);
     }
-  }, 200);
+  }, 400);
 
   return (
     <Container
@@ -71,14 +56,14 @@ export function Repos({
         <T marginBottom={10} id="get_repo_details" />
         <Input.Search
           data-testid="search-bar"
-          defaultValue={searchKey}
+          defaultValue={repoSearchKey}
           type="text"
           onChange={(evt) => handleOnChange(evt.target.value)}
           onSearch={(searchText) => handleOnChange(searchText)}
         />
       </CustomCard>
-      <RepoList reposData={repos} loading={repoLoading} repoName={searchKey} />
-      <ErrorState reposData={repos} loading={loading} reposError={error} />
+      <RepoList reposData={repos} loading={repoLoading} repoName={repoSearchKey} />
+      <ErrorState reposData={repos} loading={repoLoading} reposError={error} />
     </Container>
   );
 }
@@ -95,31 +80,14 @@ Repos.propTypes = {
   loading: PropTypes.bool.isRequired,
   recommendations: PropTypes.arrayOf(
     PropTypes.shape({ id: PropTypes.number.isRequired, name: PropTypes.string.isRequired })
-  ),
-  dispatchGetGithubRepos: PropTypes.func,
-  dispatchClearGithubRepos: PropTypes.func
+  )
 };
 
 Repos.defaultProps = {
   padding: 20,
   maxwidth: 500
 };
-const mapStateToProps = createStructuredSelector({
-  repos: selectReposData(),
-  error: selectReposError(),
-  searchKey: selectReposSearchKey()
-});
 
-function mapDispatchToProps(dispatch) {
-  const { requestGetGithubRepos, clearGithubRepos } = reposActionCreators;
-  return {
-    dispatchClearGithubRepos: () => dispatch(clearGithubRepos()),
-    dispatchGetGithubRepos: (repoName) => dispatch(requestGetGithubRepos(repoName))
-  };
-}
+export default injectIntl(Repos);
 
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-export default compose(withConnect, injectIntl, injectSaga({ key: 'repos', saga }))(Repos);
-
-export const ReposTest = compose(injectIntl)(Repos);
+export const ReposTest = injectIntl(Repos);
